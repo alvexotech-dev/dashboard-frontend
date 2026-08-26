@@ -1,0 +1,43 @@
+<div class="dashboard">
+  <div class="dashboard-header">
+    <h1>Admin Dashboard</h1>
+    <mat-form-field appearance="outline" class="global-search">
+      <mat-label>Search Booking ID, Workshop, Rider or Sales Agent</mat-label>
+      <input matInput placeholder="Start typing to search..." disabled />
+      <mat-icon matSuffix>search</mat-icon>
+    </mat-form-field>
+  </div>
+
+  @for (section of kpiSections; track section.title) {
+    <section class="kpi-section">
+      <h2>{{ section.title }}</h2>
+      <div class="kpi-grid">
+        @for (tile of section.tiles; track tile.label) {
+          <mat-card class="kpi-tile">
+            <div class="icon-chip">
+              <mat-icon>{{ tile.icon }}</mat-icon>
+            </div>
+            <div class="kpi-value">—</div>
+            <div class="kpi-label">{{ tile.label }}</div>
+          </mat-card>
+        }
+      </div>
+    </section>
+  }
+
+  <section class="kpi-section">
+    <h2>Quick Navigation</h2>
+    <div class="quick-nav-grid">
+      @for (card of quickNavCards(); track card.label) {
+        <a class="quick-nav-card" [routerLink]="'/' + card.path">
+          <mat-card>
+            <div class="icon-chip icon-chip--tertiary">
+              <mat-icon>{{ card.icon }}</mat-icon>
+            </div>
+            <span>{{ card.label }}</span>
+          </mat-card>
+        </a>
+      }
+    </div>
+  </section>
+</div>

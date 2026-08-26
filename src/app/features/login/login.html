@@ -1,0 +1,36 @@
+<div class="login-page">
+  <mat-card class="login-card">
+    <mat-card-header>
+      <mat-card-title>Admin Portal</mat-card-title>
+      <mat-card-subtitle>Bike Service Booking Platform</mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+      <div class="demo-banner">
+        <mat-icon>info</mat-icon>
+        <span>Demo mode — dashboard/backend isn't built yet, so this form signs you in locally.
+          Pick a role below to see the role-filtered navigation.</span>
+      </div>
+
+      <form (ngSubmit)="submit()" #loginForm="ngForm">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Admin name</mat-label>
+          <input matInput name="name" [ngModel]="name()" (ngModelChange)="name.set($event)" placeholder="e.g. Priya Sharma" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Role</mat-label>
+          <mat-select name="role" [ngModel]="role()" (ngModelChange)="role.set($event)">
+            @for (r of roles; track r) {
+              <mat-option [value]="r">{{ roleLabels[r] }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
+        <button mat-flat-button color="primary" type="submit" class="full-width">
+          Sign in
+        </button>
+      </form>
+    </mat-card-content>
+  </mat-card>
+</div>
