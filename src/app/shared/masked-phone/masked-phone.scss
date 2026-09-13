@@ -1,0 +1,28 @@
+.masked-phone {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+
+  &__value {
+    font-variant-numeric: tabular-nums;
+  }
+
+  &__toggle {
+    width: 28px;
+    height: 28px;
+    line-height: 28px;
+
+    ::ng-deep .mat-mdc-button-touch-target {
+      width: 28px;
+      height: 28px;
+    }
+
+    mat-icon {
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+      line-height: 18px;
+      color: var(--mat-sys-on-surface-variant, #667085);
+    }
+  }
+}

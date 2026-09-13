@@ -8,6 +8,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { VehicleUserService } from '../../../core/services/vehicle-user.service';
 import { VehicleUser } from '../../../core/models/vehicle-user';
+import { MaskedPhone } from '../../../shared/masked-phone/masked-phone';
 
 @Component({
   selector: 'app-rider-directory',
@@ -19,6 +20,7 @@ import { VehicleUser } from '../../../core/models/vehicle-user';
     MatChipsModule,
     MatProgressSpinnerModule,
     MatTooltipModule,
+    MaskedPhone,
   ],
   templateUrl: './rider-directory.html',
   styleUrl: './rider-directory.scss',

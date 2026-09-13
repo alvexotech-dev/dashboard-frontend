@@ -1,0 +1,14 @@
+<span class="masked-phone">
+  <span class="masked-phone__value">{{ display() }}</span>
+  @if (number()) {
+    <button
+      type="button"
+      mat-icon-button
+      class="masked-phone__toggle"
+      [matTooltip]="revealed() ? 'Hide number' : 'Show number'"
+      (click)="toggle()"
+    >
+      <mat-icon>{{ revealed() ? 'visibility_off' : 'visibility' }}</mat-icon>
+    </button>
+  }
+</span>

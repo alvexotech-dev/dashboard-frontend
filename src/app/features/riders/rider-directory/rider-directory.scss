@@ -62,10 +62,23 @@
 }
 
 .status-chip {
-  background: var(--mat-sys-primary-container) !important;
-  color: var(--mat-sys-on-primary-container) !important;
   font-size: 0.78rem;
   min-height: 24px;
+
+  &--active {
+    background: #ecfdf3 !important;
+    color: #027a48 !important;
+  }
+
+  &--pending {
+    background: #fffaeb !important;
+    color: #b54708 !important;
+  }
+
+  &--in-progress {
+    background: #eff8ff !important;
+    color: #175cd3 !important;
+  }
 
   &--inactive {
     background: var(--mat-sys-surface-container) !important;

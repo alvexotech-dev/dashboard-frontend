@@ -6,6 +6,7 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MechanicService } from '../../../core/services/mechanic.service';
 import { Mechanic } from '../../../core/models/mechanic';
+import { MaskedPhone } from '../../../shared/masked-phone/masked-phone';
 
 @Component({
   selector: 'app-mechanics-directory',
@@ -15,6 +16,7 @@ import { Mechanic } from '../../../core/models/mechanic';
     MatIconModule,
     MatChipsModule,
     MatProgressSpinnerModule,
+    MaskedPhone,
   ],
   templateUrl: './mechanics-directory.html',
   styleUrl: './mechanics-directory.scss',
