@@ -1,0 +1,196 @@
+<div class="registration-requests">
+  <div class="page-header">
+    <h1>Workshop Registration Requests</h1>
+    <p>Review new workshop registrations. Approve, reject, or request additional information.</p>
+  </div>
+
+  <div class="toolbar">
+    <mat-button-toggle-group
+      [value]="viewMode()"
+      (change)="onViewModeChange($event.value)"
+    >
+      <mat-button-toggle value="queue">Pending Queue</mat-button-toggle>
+      <mat-button-toggle value="all">All Requests</mat-button-toggle>
+    </mat-button-toggle-group>
+
+    <mat-form-field appearance="outline" class="search-field">
+      <mat-label>Search</mat-label>
+      <input
+        matInput
+        placeholder="Workshop, owner, mobile or city"
+        [value]="searchTerm()"
+        (input)="onSearchInput($any($event.target).value)"
+      />
+      <mat-icon matSuffix>search</mat-icon>
+    </mat-form-field>
+  </div>
+
+  <div class="content-layout">
+    <div class="list-column">
+      @if (loading()) {
+        <div class="state-panel">
+          <mat-spinner diameter="32"></mat-spinner>
+          <span>Loading requests…</span>
+        </div>
+      } @else if (error()) {
+        <mat-card class="state-panel state-panel--error">
+          <mat-icon>error_outline</mat-icon>
+          <span>{{ error() }}</span>
+        </mat-card>
+      } @else if (requests().length === 0) {
+        <mat-card class="state-panel">
+          <mat-icon>inbox</mat-icon>
+          <span>No requests found.</span>
+        </mat-card>
+      } @else {
+        <mat-card class="table-card">
+          <table mat-table [dataSource]="requests()" matSort class="striped-table" (matSortChange)="onSortChange($event)">
+            <ng-container matColumnDef="workshopName">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header="workshopName">Workshop</th>
+              <td mat-cell *matCellDef="let r">{{ r.workshopName || '—' }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="ownerName">
+              <th mat-header-cell *matHeaderCellDef>Owner</th>
+              <td mat-cell *matCellDef="let r">{{ r.ownerName }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="contact">
+              <th mat-header-cell *matHeaderCellDef>Mobile</th>
+              <td mat-cell *matCellDef="let r"><app-masked-phone [number]="r.mobileNumber"></app-masked-phone></td>
+            </ng-container>
+
+            <ng-container matColumnDef="city">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header="city">City</th>
+              <td mat-cell *matCellDef="let r">{{ r.city || '—' }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="registeredAt">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header="registeredAt">Registered</th>
+              <td mat-cell *matCellDef="let r">{{ r.registeredAt | date: 'mediumDate' }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="status">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header="status">Status</th>
+              <td mat-cell *matCellDef="let r">
+                <mat-chip
+                  class="status-chip"
+                  [class.status-chip--pending]="r.status === 'PENDING'"
+                  [class.status-chip--additional-info]="r.status === 'ADDITIONAL_INFO_REQUESTED'"
+                  [class.status-chip--approved]="r.status === 'APPROVED'"
+                  [class.status-chip--rejected]="r.status === 'REJECTED'"
+                >
+                  {{ r.status === 'ADDITIONAL_INFO_REQUESTED' ? 'Info Requested' : (r.status | titlecase) }}
+                </mat-chip>
+              </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr
+              mat-row
+              *matRowDef="let row; columns: displayedColumns;"
+              class="clickable-row"
+              [class.selected-row]="row.id === selectedId()"
+              (click)="selectRequest(row.id)"
+            ></tr>
+          </table>
+
+          <mat-paginator
+            [length]="totalElements()"
+            [pageSize]="pageSize()"
+            [pageIndex]="pageIndex()"
+            [pageSizeOptions]="pageSizeOptions"
+            (page)="onPageChange($event)"
+            showFirstLastButtons
+          ></mat-paginator>
+        </mat-card>
+      }
+    </div>
+
+    <div class="detail-column">
+      @if (detailLoading()) {
+        <mat-card class="state-panel">
+          <mat-spinner diameter="28"></mat-spinner>
+          <span>Loading details…</span>
+        </mat-card>
+      } @else if (!selectedDetail()) {
+        <mat-card class="state-panel">
+          <mat-icon>touch_app</mat-icon>
+          <span>Select a request to view details.</span>
+        </mat-card>
+      } @else {
+        <mat-card class="detail-card">
+          <h2>{{ selectedDetail()!.workshopName || '—' }}</h2>
+          <mat-chip
+            class="status-chip"
+            [class.status-chip--pending]="selectedDetail()!.status === 'PENDING'"
+            [class.status-chip--additional-info]="selectedDetail()!.status === 'ADDITIONAL_INFO_REQUESTED'"
+            [class.status-chip--approved]="selectedDetail()!.status === 'APPROVED'"
+            [class.status-chip--rejected]="selectedDetail()!.status === 'REJECTED'"
+          >
+            {{ selectedDetail()!.status === 'ADDITIONAL_INFO_REQUESTED' ? 'Info Requested' : (selectedDetail()!.status | titlecase) }}
+          </mat-chip>
+
+          <dl class="detail-fields">
+            <dt>Owner Name</dt>
+            <dd>{{ selectedDetail()!.ownerName }}</dd>
+
+            <dt>Mobile Number</dt>
+            <dd><app-masked-phone [number]="selectedDetail()!.mobileNumber"></app-masked-phone></dd>
+
+            <dt>Address</dt>
+            <dd>
+              {{ selectedDetail()!.addressLine1 || '—' }}
+              @if (selectedDetail()!.addressLine2) { , {{ selectedDetail()!.addressLine2 }} }
+            </dd>
+
+            <dt>City</dt>
+            <dd>{{ selectedDetail()!.city || '—' }}</dd>
+
+            <dt>Registration Date &amp; Time</dt>
+            <dd>{{ selectedDetail()!.registeredAt | date: 'medium' }}</dd>
+
+            <dt>Referred Sales Agent</dt>
+            <dd>{{ selectedDetail()!.referredSalesAgentName || '—' }}</dd>
+
+            @if (selectedDetail()!.decisionReason) {
+              <dt>Decision Reason / Comments</dt>
+              <dd>{{ selectedDetail()!.decisionReason }}</dd>
+            }
+
+            @if (selectedDetail()!.decidedByAdminName) {
+              <dt>Decided By</dt>
+              <dd>{{ selectedDetail()!.decidedByAdminName }} on {{ selectedDetail()!.decidedAt | date: 'medium' }}</dd>
+            }
+          </dl>
+
+          @if (selectedDetail()!.status === 'PENDING' || selectedDetail()!.status === 'ADDITIONAL_INFO_REQUESTED') {
+            <div class="detail-actions">
+              <button mat-flat-button color="primary" [disabled]="actionInProgress()" (click)="approve()">
+                Approve
+              </button>
+              <button mat-stroked-button color="warn" [disabled]="actionInProgress()" (click)="reject()">
+                Reject
+              </button>
+              <button mat-stroked-button [disabled]="actionInProgress()" (click)="requestInfo()">
+                Request Additional Information
+              </button>
+
+              @if (selectedDetail()!.status === 'ADDITIONAL_INFO_REQUESTED') {
+                <button mat-stroked-button [disabled]="actionInProgress()" (click)="markResubmitted()">
+                  Mark as Resubmitted
+                </button>
+                <p class="helper-note">
+                  Interim step: there is no automated resubmission channel yet, so use this once the workshop has
+                  provided the requested information outside the portal, to send it back to Pending for re-review.
+                </p>
+              }
+            </div>
+          } @else {
+            <p class="helper-note">This request has been decided and is now read-only.</p>
+          }
+        </mat-card>
+      }
+    </div>
+  </div>
+</div>

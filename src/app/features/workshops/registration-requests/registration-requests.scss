@@ -1,0 +1,153 @@
+.page-header {
+  margin-bottom: 20px;
+
+  h1 {
+    margin: 0 0 4px;
+    color: var(--mat-sys-on-surface);
+  }
+
+  p {
+    margin: 0;
+    color: var(--mat-sys-on-surface-variant);
+  }
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.search-field {
+  width: 100%;
+  max-width: 320px;
+  margin-bottom: -1.25em;
+}
+
+.content-layout {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+  flex-wrap: wrap;
+
+  .list-column {
+    flex: 2 1 480px;
+    min-width: 0;
+  }
+
+  .detail-column {
+    flex: 1 1 320px;
+    min-width: 300px;
+    position: sticky;
+    top: 16px;
+  }
+}
+
+.state-panel {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 32px;
+  border: 1px solid var(--mat-sys-outline-variant);
+  border-radius: 12px;
+  box-shadow: none;
+  color: var(--mat-sys-on-surface-variant);
+
+  &--error {
+    color: var(--mat-sys-error);
+
+    mat-icon {
+      color: var(--mat-sys-error);
+    }
+  }
+}
+
+.table-card {
+  padding: 0;
+  border: 1px solid var(--mat-sys-outline-variant);
+  border-radius: 12px;
+  box-shadow: none;
+  overflow-x: auto;
+
+  table {
+    width: 100%;
+  }
+}
+
+.clickable-row {
+  cursor: pointer;
+
+  &:hover {
+    background: var(--mat-sys-surface-container-lowest);
+  }
+}
+
+.selected-row {
+  background: var(--mat-sys-surface-container-low);
+}
+
+.detail-card {
+  padding: 20px;
+  border: 1px solid var(--mat-sys-outline-variant);
+  border-radius: 12px;
+  box-shadow: none;
+
+  h2 {
+    margin: 0 0 8px;
+  }
+}
+
+.detail-fields {
+  margin: 16px 0;
+
+  dt {
+    font-size: 0.78rem;
+    color: var(--mat-sys-on-surface-variant);
+    margin-top: 12px;
+  }
+
+  dd {
+    margin: 2px 0 0;
+    color: var(--mat-sys-on-surface);
+  }
+}
+
+.detail-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.helper-note {
+  font-size: 0.78rem;
+  color: var(--mat-sys-on-surface-variant);
+  margin-top: 8px;
+}
+
+.status-chip {
+  font-size: 0.78rem;
+  min-height: 24px;
+
+  &--pending {
+    background: #fffaeb !important;
+    color: #b54708 !important;
+  }
+
+  &--additional-info {
+    background: #eff8ff !important;
+    color: #175cd3 !important;
+  }
+
+  &--approved {
+    background: #ecfdf3 !important;
+    color: #027a48 !important;
+  }
+
+  &--rejected {
+    background: #fef3f2 !important;
+    color: #b42318 !important;
+  }
+}

@@ -1,10 +1,13 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
+import { roleGuard } from './core/guards/role.guard';
 import { NAV_GROUPS } from './core/nav-items';
 
 // Every sidenav child route defaults to the generic Placeholder component,
 // driven by its `data.title` / `data.description`, except the ones swapped
-// in below as each module gets built.
+// in below as each module gets built. Each route also carries its group's
+// `roles` in `data` + `roleGuard`, so direct navigation (not just sidenav
+// visibility) is blocked for a role that shouldn't see that module.
 const moduleRoutes: Routes = NAV_GROUPS.flatMap((group) =>
   group.children.map((child) => ({
     path: child.path,
@@ -16,8 +19,14 @@ const moduleRoutes: Routes = NAV_GROUPS.flatMap((group) =>
             )
         : child.path === 'riders/directory'
         ? () => import('./features/riders/rider-directory/rider-directory').then((m) => m.RiderDirectory)
+        : child.path === 'workshops/registration-requests'
+        ? () =>
+            import('./features/workshops/registration-requests/registration-requests').then(
+              (m) => m.RegistrationRequests,
+            )
         : () => import('./shared/placeholder/placeholder').then((m) => m.Placeholder),
-    data: { title: child.label, description: child.description },
+    canActivate: [roleGuard],
+    data: { title: child.label, description: child.description, roles: group.roles },
   }))
 );
 

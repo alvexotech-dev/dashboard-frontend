@@ -4,11 +4,10 @@ import { Router } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { AuthService } from '../../core/services/auth.service';
-import { AdminRole, ADMIN_ROLE_LABELS } from '../../core/models/admin-role';
 
 @Component({
   selector: 'app-login',
@@ -17,25 +16,35 @@ import { AdminRole, ADMIN_ROLE_LABELS } from '../../core/models/admin-role';
     MatCardModule,
     MatFormFieldModule,
     MatInputModule,
-    MatSelectModule,
     MatButtonModule,
     MatIconModule,
+    MatProgressSpinnerModule,
   ],
   templateUrl: './login.html',
   styleUrl: './login.scss',
 })
 export class Login {
-  readonly roles = Object.values(AdminRole);
-  readonly roleLabels = ADMIN_ROLE_LABELS;
-
-  readonly name = signal('');
-  readonly role = signal<AdminRole>(AdminRole.SUPER_ADMIN);
+  readonly email = signal('');
+  readonly password = signal('');
+  readonly loading = signal(false);
+  readonly error = signal<string | null>(null);
 
   constructor(private auth: AuthService, private router: Router) {}
 
   submit(): void {
-    const name = this.name().trim() || 'Admin User';
-    this.auth.login(name, this.role());
-    this.router.navigate(['/dashboard']);
+    if (!this.email().trim() || !this.password()) return;
+
+    this.loading.set(true);
+    this.error.set(null);
+    this.auth.login(this.email().trim(), this.password()).subscribe({
+      next: () => {
+        this.loading.set(false);
+        this.router.navigate(['/dashboard']);
+      },
+      error: () => {
+        this.loading.set(false);
+        this.error.set('Invalid email or password.');
+      },
+    });
   }
 }
