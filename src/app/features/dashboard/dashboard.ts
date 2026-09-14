@@ -24,9 +24,10 @@ interface KpiSection {
 
 /**
  * Dashboard KPI layout mirrors ADMIN-US-01 / BR-02..BR-20 in the docx.
- * Registered/Deleted Riders and Registered/Deleted Workshops are wired to
- * GET /api/dashboard/summary via `key`; every other tile stays a "—"
- * placeholder until its epic exposes real data — add a `key` there too
+ * Rider/Workshop registered+deleted, workshop Pickup&Drop/Advance-Payment
+ * adoption, and suspended/deleted counts for workshops and sales agents are
+ * wired to GET /api/dashboard/summary via `key`; every other tile stays a
+ * "—" placeholder until its epic exposes real data — add a `key` there too
  * once DashboardSummaryDto grows the matching field.
  */
 const KPI_SECTIONS: KpiSection[] = [
@@ -43,18 +44,18 @@ const KPI_SECTIONS: KpiSection[] = [
       { label: 'Registered Workshops', icon: 'store', key: 'registeredWorkshops' },
       { label: 'Listed Workshops', icon: 'storefront' },
       { label: 'Platform Trusted Workshops', icon: 'verified' },
-      { label: 'Pickup & Drop Enabled', icon: 'local_shipping' },
-      { label: 'Advance Payment Enabled', icon: 'account_balance_wallet' },
-      { label: 'Suspended Workshops', icon: 'block' },
+      { label: 'Pickup & Drop Enabled', icon: 'local_shipping', key: 'pickupDropEnabledWorkshops' },
+      { label: 'Advance Payment Enabled', icon: 'account_balance_wallet', key: 'advancePaymentEnabledWorkshops' },
+      { label: 'Suspended Workshops', icon: 'block', key: 'suspendedWorkshops' },
       { label: 'Deleted Workshops', icon: 'delete', key: 'deletedWorkshops' },
     ],
   },
   {
     title: 'Sales Agent Summary',
     tiles: [
-      { label: 'Registered Sales Agents', icon: 'badge' },
-      { label: 'Suspended Sales Agents', icon: 'block' },
-      { label: 'Deleted Sales Agents', icon: 'delete' },
+      { label: 'Registered Sales Agents', icon: 'badge', key: 'registeredSalesAgents' },
+      { label: 'Suspended Sales Agents', icon: 'block', key: 'suspendedSalesAgents' },
+      { label: 'Deleted Sales Agents', icon: 'delete', key: 'deletedSalesAgents' },
     ],
   },
   {
