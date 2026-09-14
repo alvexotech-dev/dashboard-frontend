@@ -34,6 +34,10 @@ mat-card-title {
   margin-bottom: 16px;
   font-size: 0.82rem;
   line-height: 1.3;
+  // Fixed pale-yellow background regardless of theme, so the text color
+  // is pinned dark here too rather than inheriting --mat-sys-on-surface
+  // (which flips to near-white in dark mode and disappears against it).
+  color: #7a5900;
 
   mat-icon {
     font-size: 18px;

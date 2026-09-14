@@ -4,6 +4,17 @@
     <p>Registered workshops and their owning mechanic, sourced from the vehicle-service-booking-api user records.</p>
   </div>
 
+  <mat-form-field appearance="outline" class="search-field">
+    <mat-label>Search</mat-label>
+    <input
+      matInput
+      placeholder="Name, workshop, email or mobile"
+      [value]="searchTerm()"
+      (input)="onSearchInput($any($event.target).value)"
+    />
+    <mat-icon matSuffix>search</mat-icon>
+  </mat-form-field>
+
   @if (loading()) {
     <div class="state-panel">
       <mat-spinner diameter="32"></mat-spinner>
@@ -21,9 +32,9 @@
     </mat-card>
   } @else {
     <mat-card class="table-card">
-      <table mat-table [dataSource]="mechanics()">
+      <table mat-table [dataSource]="mechanics()" matSort class="striped-table" (matSortChange)="onSortChange($event)">
         <ng-container matColumnDef="name">
-          <th mat-header-cell *matHeaderCellDef>Owner Name</th>
+          <th mat-header-cell *matHeaderCellDef mat-sort-header="firstName">Owner Name</th>
           <td mat-cell *matCellDef="let m">{{ m.firstName }} {{ m.lastName }}</td>
         </ng-container>
 
@@ -36,37 +47,37 @@
         </ng-container>
 
         <ng-container matColumnDef="workshopName">
-          <th mat-header-cell *matHeaderCellDef>Workshop Name</th>
+          <th mat-header-cell *matHeaderCellDef mat-sort-header="workshopName">Workshop Name</th>
           <td mat-cell *matCellDef="let m">{{ m.workshopName || '—' }}</td>
         </ng-container>
 
         <ng-container matColumnDef="city">
-          <th mat-header-cell *matHeaderCellDef>City</th>
+          <th mat-header-cell *matHeaderCellDef mat-sort-header="city">City</th>
           <td mat-cell *matCellDef="let m">{{ m.city || '—' }}</td>
         </ng-container>
 
         <ng-container matColumnDef="specialization">
-          <th mat-header-cell *matHeaderCellDef>Specialization</th>
+          <th mat-header-cell *matHeaderCellDef mat-sort-header="specialization">Specialization</th>
           <td mat-cell *matCellDef="let m">{{ m.specialization || '—' }}</td>
         </ng-container>
 
         <ng-container matColumnDef="experienceYears">
-          <th mat-header-cell *matHeaderCellDef>Experience</th>
+          <th mat-header-cell *matHeaderCellDef mat-sort-header="experienceYears">Experience</th>
           <td mat-cell *matCellDef="let m">{{ m.experienceYears !== null ? m.experienceYears + ' yrs' : '—' }}</td>
         </ng-container>
 
         <ng-container matColumnDef="hourlyRate">
-          <th mat-header-cell *matHeaderCellDef>Hourly Rate</th>
+          <th mat-header-cell *matHeaderCellDef mat-sort-header="hourlyRate">Hourly Rate</th>
           <td mat-cell *matCellDef="let m">{{ m.hourlyRate !== null ? ('₹' + m.hourlyRate) : '—' }}</td>
         </ng-container>
 
         <ng-container matColumnDef="rating">
-          <th mat-header-cell *matHeaderCellDef>Rating</th>
+          <th mat-header-cell *matHeaderCellDef mat-sort-header="rating">Rating</th>
           <td mat-cell *matCellDef="let m">{{ m.rating !== null ? m.rating : '—' }}</td>
         </ng-container>
 
         <ng-container matColumnDef="active">
-          <th mat-header-cell *matHeaderCellDef>Status</th>
+          <th mat-header-cell *matHeaderCellDef mat-sort-header="active">Status</th>
           <td mat-cell *matCellDef="let m">
             <mat-chip
               class="status-chip"
@@ -81,6 +92,15 @@
         <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
         <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
       </table>
+
+      <mat-paginator
+        [length]="totalElements()"
+        [pageSize]="pageSize()"
+        [pageIndex]="pageIndex()"
+        [pageSizeOptions]="pageSizeOptions"
+        (page)="onPageChange($event)"
+        showFirstLastButtons
+      ></mat-paginator>
     </mat-card>
   }
 </div>

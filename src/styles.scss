@@ -38,6 +38,28 @@ html {
   --mat-sys-outline-variant: #e4e7ec;
 }
 
+// Manual dark mode, toggled by ThemeService adding/removing this class on
+// <html> (see core/services/theme.service.ts). Redefines the same
+// --mat-sys-* custom properties the light block above sets — every
+// component in this app already reads color through those tokens (see the
+// "Gotcha" note in CLAUDE.md about mat-list-item), so no per-component dark
+// styling is needed beyond this block plus the status-chip override below.
+html.dark-theme {
+  --mat-sys-primary: #6172f3;
+  --mat-sys-on-primary: #ffffff;
+  --mat-sys-primary-container: #28316e;
+  --mat-sys-on-primary-container: #c7d2fe;
+
+  --mat-sys-surface: #1d2939;
+  --mat-sys-surface-container-lowest: #101828;
+  --mat-sys-surface-container-low: #1d2939;
+  --mat-sys-surface-container: #29354a;
+  --mat-sys-on-surface: #f9fafb;
+  --mat-sys-on-surface-variant: #98a2b3;
+  --mat-sys-outline: #475467;
+  --mat-sys-outline-variant: #344054;
+}
+
 body {
   // Default the application to a light color theme. This can be changed to
   // `dark` to enable the dark color theme, or to `light dark` to defer to the
@@ -54,7 +76,46 @@ body {
   // Reset the user agent margin.
   margin: 0;
 }
+
+html.dark-theme body {
+  color-scheme: dark;
+}
+
 /* You can add global styles to this file, and also import other style files */
 
 html, body { height: 100%; }
 body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+
+// Reusable odd/even row striping for paginated Material tables (mechanics
+// and riders directories). Targeted at the tbody rows only so the header
+// row (rendered into its own <thead> by mat-table) is never affected.
+.striped-table {
+  tbody tr.mat-mdc-row:nth-child(odd) {
+    background-color: var(--mat-sys-surface-container);
+  }
+
+  tbody tr.mat-mdc-row:nth-child(even) {
+    background-color: var(--mat-sys-surface);
+  }
+}
+
+// Status chip colors are hardcoded pastel hex (not theme tokens) so they
+// need an explicit dark-mode variant to stay legible against dark cards.
+html.dark-theme {
+  .status-chip {
+    &--active {
+      background: #12261e !important;
+      color: #3dd68c !important;
+    }
+
+    &--pending {
+      background: #2b2111 !important;
+      color: #f7b955 !important;
+    }
+
+    &--in-progress {
+      background: #10213a !important;
+      color: #6da3f5 !important;
+    }
+  }
+}

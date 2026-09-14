@@ -1,15 +1,20 @@
-import { Component, computed } from '@angular/core';
+import { Component, computed, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { AuthService } from '../../core/services/auth.service';
+import { DashboardService } from '../../core/services/dashboard.service';
+import { DashboardSummary } from '../../core/models/dashboard-summary';
 import { NAV_GROUPS } from '../../core/nav-items';
 
 interface KpiTile {
   label: string;
   icon: string;
+  // Maps this tile to a live count from DashboardSummary. Tiles without a
+  // key stay "—" placeholders until their epic exposes real data.
+  key?: keyof DashboardSummary;
 }
 
 interface KpiSection {
@@ -19,27 +24,29 @@ interface KpiSection {
 
 /**
  * Dashboard KPI layout mirrors ADMIN-US-01 / BR-02..BR-20 in the docx.
- * Values are placeholders ("—") until dashboard/backend exposes the
- * summary endpoints — wire each tile up to real counts then.
+ * Registered/Deleted Riders and Registered/Deleted Workshops are wired to
+ * GET /api/dashboard/summary via `key`; every other tile stays a "—"
+ * placeholder until its epic exposes real data — add a `key` there too
+ * once DashboardSummaryDto grows the matching field.
  */
 const KPI_SECTIONS: KpiSection[] = [
   {
     title: 'Rider Summary',
     tiles: [
-      { label: 'Registered Riders', icon: 'group' },
-      { label: 'Deleted Riders', icon: 'person_off' },
+      { label: 'Registered Riders', icon: 'group', key: 'registeredRiders' },
+      { label: 'Deleted Riders', icon: 'person_off', key: 'deletedRiders' },
     ],
   },
   {
     title: 'Workshop Summary',
     tiles: [
-      { label: 'Registered Workshops', icon: 'store' },
+      { label: 'Registered Workshops', icon: 'store', key: 'registeredWorkshops' },
       { label: 'Listed Workshops', icon: 'storefront' },
       { label: 'Platform Trusted Workshops', icon: 'verified' },
       { label: 'Pickup & Drop Enabled', icon: 'local_shipping' },
       { label: 'Advance Payment Enabled', icon: 'account_balance_wallet' },
       { label: 'Suspended Workshops', icon: 'block' },
-      { label: 'Deleted Workshops', icon: 'delete' },
+      { label: 'Deleted Workshops', icon: 'delete', key: 'deletedWorkshops' },
     ],
   },
   {
@@ -82,6 +89,8 @@ const KPI_SECTIONS: KpiSection[] = [
 export class Dashboard {
   readonly kpiSections = KPI_SECTIONS;
 
+  readonly summary = signal<DashboardSummary | null>(null);
+
   readonly quickNavCards = computed(() => {
     const role = this.auth.currentRole();
     if (!role) return [];
@@ -92,5 +101,17 @@ export class Dashboard {
     }));
   });
 
-  constructor(protected auth: AuthService) {}
+  constructor(protected auth: AuthService, private dashboardService: DashboardService) {
+    this.dashboardService.getSummary().subscribe({
+      next: (summary) => this.summary.set(summary),
+      // Leave tiles at their "—" placeholder if the backend isn't reachable.
+      error: () => this.summary.set(null),
+    });
+  }
+
+  tileValue(tile: KpiTile): string {
+    const summary = this.summary();
+    if (!tile.key || !summary) return '—';
+    return summary[tile.key].toLocaleString();
+  }
 }

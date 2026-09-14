@@ -10,6 +10,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { AuthService } from '../../core/services/auth.service';
+import { ThemeService } from '../../core/services/theme.service';
 import { ADMIN_ROLE_LABELS } from '../../core/models/admin-role';
 import { NAV_GROUPS } from '../../core/nav-items';
 
@@ -49,7 +50,7 @@ export class SideNav {
   // expanded and never leaves every group closed with no visible context.
   readonly openGroupIndex = signal<number | null>(null);
 
-  constructor(protected auth: AuthService, private router: Router) {
+  constructor(protected auth: AuthService, protected theme: ThemeService, private router: Router) {
     this.syncOpenGroupToRoute();
     this.router
       .events.pipe(
