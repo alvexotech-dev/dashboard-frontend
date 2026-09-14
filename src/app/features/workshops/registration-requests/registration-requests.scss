@@ -1,3 +1,5 @@
+@use '@angular/material' as mat;
+
 .page-header {
   margin-bottom: 20px;
 
@@ -85,7 +87,10 @@
 }
 
 .selected-row {
-  background: var(--mat-sys-surface-container-low);
+  // !important: the global .striped-table odd/even rule (styles.scss) is
+  // more specific than a single class here, so it would otherwise win and
+  // hide the selection highlight on every other row.
+  background: var(--mat-sys-primary-container) !important;
 }
 
 .detail-card {
@@ -127,27 +132,51 @@
   margin-top: 8px;
 }
 
+// Plain `background`/`color` on the chip host doesn't reach the actual
+// visible label — Material 3 chips paint their text via an inner
+// `.mdc-evolution-chip__text-label` span that reads the
+// `--mdc-chip-label-text-color` custom property directly, ignoring the
+// host's inherited `color` (the same class of gotcha documented in
+// dashboard/CLAUDE.md for mat-list-item). `mat.chips-overrides(...)` sets
+// that property correctly, scoped per status via the surrounding selector.
 .status-chip {
   font-size: 0.78rem;
   min-height: 24px;
 
   &--pending {
-    background: #fffaeb !important;
-    color: #b54708 !important;
+    @include mat.chips-overrides((
+      label-text-color: #b54708,
+      elevated-container-color: #fffaeb,
+    ));
   }
 
   &--additional-info {
-    background: #eff8ff !important;
-    color: #175cd3 !important;
+    @include mat.chips-overrides((
+      label-text-color: #175cd3,
+      elevated-container-color: #eff8ff,
+    ));
   }
 
   &--approved {
-    background: #ecfdf3 !important;
-    color: #027a48 !important;
+    @include mat.chips-overrides((
+      label-text-color: #027a48,
+      elevated-container-color: #ecfdf3,
+    ));
   }
 
   &--rejected {
-    background: #fef3f2 !important;
-    color: #b42318 !important;
+    @include mat.chips-overrides((
+      label-text-color: #b42318,
+      elevated-container-color: #fef3f2,
+    ));
   }
 }
+
+// Dark-mode counterparts for these four modifiers live in the global
+// styles.scss dark block instead of here: a selector like `html.dark-theme
+// .foo` written inside a component's own SCSS gets Angular's view-
+// encapsulation attribute wrongly appended to the `html.dark-theme`
+// ancestor too (which never has that attribute in the real DOM, since
+// <html> isn't part of this component's template), so the rule silently
+// never matches. Global styles aren't encapsulated, so the ancestor
+// selector works correctly there.

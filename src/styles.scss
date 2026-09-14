@@ -101,21 +101,58 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
 
 // Status chip colors are hardcoded pastel hex (not theme tokens) so they
 // need an explicit dark-mode variant to stay legible against dark cards.
+// Uses mat.chips-overrides (not plain background/color) because a bare
+// `mat-chip`'s visible label is painted by an inner
+// `.mdc-evolution-chip__text-label` span that reads the
+// `--mat-chip-label-text-color` custom property directly — a plain
+// `color` on the host never reaches it (see the mat-list-item gotcha
+// this file already documents above). This block must stay here rather
+// than move into a component's own SCSS: a selector like `html.dark-theme
+// .foo` written inside a component file gets Angular's encapsulation
+// attribute wrongly appended to the `html.dark-theme` ancestor too, which
+// never matches the real <html> element, silently breaking the rule.
 html.dark-theme {
   .status-chip {
     &--active {
-      background: #12261e !important;
-      color: #3dd68c !important;
+      @include mat.chips-overrides((
+        label-text-color: #3dd68c,
+        elevated-container-color: #12261e,
+      ));
     }
 
     &--pending {
-      background: #2b2111 !important;
-      color: #f7b955 !important;
+      @include mat.chips-overrides((
+        label-text-color: #f7b955,
+        elevated-container-color: #2b2111,
+      ));
     }
 
     &--in-progress {
-      background: #10213a !important;
-      color: #6da3f5 !important;
+      @include mat.chips-overrides((
+        label-text-color: #6da3f5,
+        elevated-container-color: #10213a,
+      ));
+    }
+
+    &--additional-info {
+      @include mat.chips-overrides((
+        label-text-color: #6da3f5,
+        elevated-container-color: #10213a,
+      ));
+    }
+
+    &--approved {
+      @include mat.chips-overrides((
+        label-text-color: #3dd68c,
+        elevated-container-color: #12261e,
+      ));
+    }
+
+    &--rejected {
+      @include mat.chips-overrides((
+        label-text-color: #f97066,
+        elevated-container-color: #2c1210,
+      ));
     }
   }
 }
