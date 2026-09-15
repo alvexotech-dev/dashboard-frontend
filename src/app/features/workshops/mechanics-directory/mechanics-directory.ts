@@ -1,4 +1,6 @@
 import { Component, signal } from '@angular/core';
+import { Router } from '@angular/router';
+import { DatePipe, TitleCasePipe } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Subject, debounceTime, distinctUntilChanged } from 'rxjs';
 import { MatTableModule } from '@angular/material/table';
@@ -17,6 +19,8 @@ import { MaskedPhone } from '../../../shared/masked-phone/masked-phone';
 @Component({
   selector: 'app-mechanics-directory',
   imports: [
+    DatePipe,
+    TitleCasePipe,
     MatTableModule,
     MatCardModule,
     MatIconModule,
@@ -32,16 +36,26 @@ import { MaskedPhone } from '../../../shared/masked-phone/masked-phone';
   styleUrl: './mechanics-directory.scss',
 })
 export class MechanicsDirectory {
+  // Order mirrors BR-05's required column list (Workshop ID, Name, City,
+  // Registration Date, Pickup & Drop, Advance Payment, Account Status, Sales
+  // Agent — Listed/Platform Trusted omitted until ADMIN-US-06's verification
+  // table exists), with owner/contact and the extra mechanic-profile fields
+  // kept afterwards since they were already here and are still useful.
   readonly displayedColumns = [
+    'id',
     'workshopName',
+    'city',
+    'registeredAt',
+    'pickupDrop',
+    'advancePayment',
+    'accountStatus',
+    'salesAgent',
     'name',
     'contact',
-    'city',
     'specialization',
     'experienceYears',
     'hourlyRate',
     'rating',
-    'active',
   ];
 
   readonly pageSizeOptions = [5, 10, 25, 50];
@@ -59,7 +73,10 @@ export class MechanicsDirectory {
 
   private readonly searchInput$ = new Subject<string>();
 
-  constructor(private mechanicService: MechanicService) {
+  constructor(
+    private mechanicService: MechanicService,
+    private router: Router,
+  ) {
     this.searchInput$
       .pipe(debounceTime(300), distinctUntilChanged(), takeUntilDestroyed())
       .subscribe((term) => {
@@ -85,6 +102,11 @@ export class MechanicsDirectory {
     this.sortDirection.set(sort.direction === 'desc' ? 'desc' : 'asc');
     this.pageIndex.set(0);
     this.load();
+  }
+
+  // BR-06: selecting a workshop opens the read-only Workshop Summary page.
+  viewWorkshop(id: number): void {
+    this.router.navigate(['/workshops/directory', id]);
   }
 
   private load(): void {

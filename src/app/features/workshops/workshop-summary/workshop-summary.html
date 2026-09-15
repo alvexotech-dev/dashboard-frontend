@@ -1,0 +1,149 @@
+<div class="workshop-summary">
+  <button mat-button class="back-link" (click)="backToDirectory()">
+    <mat-icon>arrow_back</mat-icon>
+    Workshop Directory
+  </button>
+
+  @if (loading()) {
+    <div class="state-panel">
+      <mat-spinner diameter="32"></mat-spinner>
+      <span>Loading workshop…</span>
+    </div>
+  } @else if (error()) {
+    <mat-card class="state-panel state-panel--error">
+      <mat-icon>error_outline</mat-icon>
+      <span>{{ error() }}</span>
+    </mat-card>
+  } @else if (workshop(); as w) {
+    <div class="page-header">
+      <div>
+        <h1>{{ w.workshopName || '—' }}</h1>
+        <p>Workshop ID {{ w.id }}</p>
+      </div>
+      <mat-chip
+        class="status-chip"
+        [class.status-chip--approved]="w.accountStatus === 'ACTIVE'"
+        [class.status-chip--pending]="w.accountStatus === 'SUSPENDED'"
+        [class.status-chip--rejected]="w.accountStatus === 'DELETED'"
+      >
+        {{ w.accountStatus | titlecase }}
+      </mat-chip>
+    </div>
+
+    <p class="readonly-note">
+      <mat-icon>lock</mat-icon>
+      This screen is read-only. Suspend, verify or enable/disable actions live in their own modules.
+    </p>
+
+    <div class="summary-grid">
+      <mat-card class="summary-card">
+        <h2>Basic Information</h2>
+        <dl class="detail-fields">
+          <dt>Workshop Name</dt>
+          <dd>{{ w.workshopName || '—' }}</dd>
+
+          <dt>Owner Name</dt>
+          <dd>{{ w.ownerName }}</dd>
+
+          <dt>Mobile Number</dt>
+          <dd><app-masked-phone [number]="w.mobileNumber"></app-masked-phone></dd>
+
+          <dt>Address</dt>
+          <dd>
+            {{ w.addressLine1 || '—' }}
+            @if (w.addressLine2) { , {{ w.addressLine2 }} }
+            @if (w.city) { , {{ w.city }} }
+            @if (w.state) { , {{ w.state }} }
+            @if (w.postalCode) { {{ w.postalCode }} }
+            @if (w.country) { , {{ w.country }} }
+          </dd>
+        </dl>
+      </mat-card>
+
+      <mat-card class="summary-card">
+        <h2>Business Information</h2>
+        <p class="unavailable-note">
+          Supported vehicle types and working days/hours are not available here — they live on mechanic-scheduling
+          tables this service doesn't model. See the Workshop App for this detail.
+        </p>
+      </mat-card>
+
+      <mat-card class="summary-card">
+        <h2>Platform Information</h2>
+        <dl class="detail-fields">
+          <dt>Registration Date</dt>
+          <dd>{{ w.registeredAt | date: 'medium' }}</dd>
+
+          <dt>Listed / Platform Trusted Status</dt>
+          <dd class="unavailable-note">Not available yet — pending ADMIN-US-06's verification-status table.</dd>
+
+          <dt>Pickup &amp; Drop Status</dt>
+          <dd>
+            <mat-icon [class.enabled-icon]="w.pickupDropEnabled" [class.disabled-icon]="!w.pickupDropEnabled">
+              {{ w.pickupDropEnabled ? 'check_circle' : 'cancel' }}
+            </mat-icon>
+            {{ w.pickupDropEnabled ? 'Enabled' : 'Disabled' }}
+          </dd>
+
+          <dt>Advance Payment Status</dt>
+          <dd>
+            <mat-icon [class.enabled-icon]="w.advancePaymentEnabled" [class.disabled-icon]="!w.advancePaymentEnabled">
+              {{ w.advancePaymentEnabled ? 'check_circle' : 'cancel' }}
+            </mat-icon>
+            {{ w.advancePaymentEnabled ? 'Enabled' : 'Disabled' }}
+          </dd>
+
+          <dt>Sales Agent</dt>
+          <dd>{{ w.salesAgentName || '—' }}</dd>
+        </dl>
+      </mat-card>
+
+      <mat-card class="summary-card">
+        <h2>Booking Summary</h2>
+        <div class="stat-row">
+          <div class="stat-tile">
+            <span class="stat-value">{{ w.totalBookings }}</span>
+            <span class="stat-label">Total Bookings</span>
+          </div>
+          <div class="stat-tile">
+            <span class="stat-value">{{ w.upcomingBookings }}</span>
+            <span class="stat-label">Upcoming Bookings</span>
+          </div>
+          <div class="stat-tile">
+            <span class="stat-value">{{ w.cancelledBookings }}</span>
+            <span class="stat-label">Cancelled Bookings</span>
+          </div>
+        </div>
+      </mat-card>
+
+      <mat-card class="summary-card">
+        <h2>Finance Summary</h2>
+        <dl class="detail-fields">
+          <dt>Last Settlement Date</dt>
+          <dd>{{ w.lastSettlementDate ? (w.lastSettlementDate | date: 'mediumDate') : 'No settlements yet' }}</dd>
+
+          <dt>Last Settlement Status</dt>
+          <dd>{{ w.lastSettlementStatus ? (w.lastSettlementStatus | titlecase) : '—' }}</dd>
+        </dl>
+      </mat-card>
+
+      <mat-card class="summary-card">
+        <h2>Navigation</h2>
+        <div class="nav-links">
+          <a mat-stroked-button routerLink="/finance/settlement-summary">
+            <mat-icon>payments</mat-icon>
+            Finance Summary
+          </a>
+          <button mat-stroked-button disabled matTooltip="Not available yet — no workshop-scoped booking history screen exists.">
+            <mat-icon>history</mat-icon>
+            Booking History
+          </button>
+          <button mat-stroked-button disabled matTooltip="Not available yet — document storage isn't modeled in this service.">
+            <mat-icon>description</mat-icon>
+            Uploaded Documents
+          </button>
+        </div>
+      </mat-card>
+    </div>
+  }
+</div>

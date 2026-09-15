@@ -1,3 +1,5 @@
+export type AccountStatus = 'ACTIVE' | 'SUSPENDED' | 'DELETED';
+
 export interface Mechanic {
   id: number;
   firstName: string;
@@ -11,5 +13,9 @@ export interface Mechanic {
   experienceYears: number | null;
   hourlyRate: number | null;
   rating: number | null;
-  active: boolean;
+  registeredAt: string;
+  pickupDropEnabled: boolean;
+  advancePaymentEnabled: boolean;
+  accountStatus: AccountStatus;
+  salesAgentName: string | null;
 }

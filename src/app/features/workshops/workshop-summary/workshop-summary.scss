@@ -1,0 +1,187 @@
+@use '@angular/material' as mat;
+
+.back-link {
+  margin-bottom: 12px;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.state-panel {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 32px;
+  border: 1px solid var(--mat-sys-outline-variant);
+  border-radius: 12px;
+  box-shadow: none;
+  color: var(--mat-sys-on-surface-variant);
+
+  &--error {
+    color: var(--mat-sys-error);
+
+    mat-icon {
+      color: var(--mat-sys-error);
+    }
+  }
+}
+
+.page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+
+  h1 {
+    margin: 0 0 4px;
+    color: var(--mat-sys-on-surface);
+  }
+
+  p {
+    margin: 0;
+    color: var(--mat-sys-on-surface-variant);
+  }
+}
+
+.readonly-note {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.82rem;
+  color: var(--mat-sys-on-surface-variant);
+  margin: 0 0 20px;
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+  }
+}
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 16px;
+}
+
+.summary-card {
+  padding: 20px;
+  border: 1px solid var(--mat-sys-outline-variant);
+  border-radius: 12px;
+  box-shadow: none;
+
+  h2 {
+    margin: 0 0 12px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--mat-sys-on-surface);
+  }
+}
+
+.detail-fields {
+  margin: 0;
+
+  dt {
+    font-size: 0.78rem;
+    color: var(--mat-sys-on-surface-variant);
+    margin-top: 12px;
+
+    &:first-child {
+      margin-top: 0;
+    }
+  }
+
+  dd {
+    margin: 2px 0 0;
+    color: var(--mat-sys-on-surface);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+
+    mat-icon {
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+    }
+  }
+}
+
+.unavailable-note {
+  font-size: 0.82rem;
+  color: var(--mat-sys-on-surface-variant);
+  font-style: italic;
+  margin: 0;
+}
+
+.stat-row {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.stat-tile {
+  flex: 1 1 100px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px;
+  border-radius: 10px;
+  background: var(--mat-sys-surface-container);
+  text-align: center;
+
+  .stat-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--mat-sys-on-surface);
+  }
+
+  .stat-label {
+    font-size: 0.76rem;
+    color: var(--mat-sys-on-surface-variant);
+  }
+}
+
+.nav-links {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  a, button {
+    justify-content: flex-start;
+  }
+}
+
+.enabled-icon {
+  color: #027a48;
+}
+
+.disabled-icon {
+  color: var(--mat-sys-outline);
+}
+
+// Same three-color chip intent as mechanics-directory.scss / registration-requests.scss.
+.status-chip {
+  font-size: 0.78rem;
+  min-height: 24px;
+
+  &--approved {
+    @include mat.chips-overrides((
+      label-text-color: #027a48,
+      elevated-container-color: #ecfdf3,
+    ));
+  }
+
+  &--pending {
+    @include mat.chips-overrides((
+      label-text-color: #b54708,
+      elevated-container-color: #fffaeb,
+    ));
+  }
+
+  &--rejected {
+    @include mat.chips-overrides((
+      label-text-color: #b42318,
+      elevated-container-color: #fef3f2,
+    ));
+  }
+}

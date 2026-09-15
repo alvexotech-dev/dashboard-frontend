@@ -2,6 +2,7 @@ import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
 import { roleGuard } from './core/guards/role.guard';
 import { NAV_GROUPS } from './core/nav-items';
+import { AdminRole } from './core/models/admin-role';
 
 // Every sidenav child route defaults to the generic Placeholder component,
 // driven by its `data.title` / `data.description`, except the ones swapped
@@ -44,6 +45,16 @@ export const routes: Routes = [
       {
         path: 'dashboard',
         loadComponent: () => import('./features/dashboard/dashboard').then((m) => m.Dashboard),
+      },
+      // Not part of NAV_GROUPS/moduleRoutes above since it isn't a sidenav
+      // destination itself — it's opened by selecting a row in the Workshop
+      // Directory (workshops/directory). Same allowed roles as that group.
+      {
+        path: 'workshops/directory/:id',
+        loadComponent: () =>
+          import('./features/workshops/workshop-summary/workshop-summary').then((m) => m.WorkshopSummary),
+        canActivate: [roleGuard],
+        data: { roles: [AdminRole.SUPER_ADMIN, AdminRole.OPERATIONS_ADMIN] },
       },
       ...moduleRoutes,
     ],

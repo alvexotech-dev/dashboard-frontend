@@ -1,3 +1,5 @@
+@use '@angular/material' as mat;
+
 .page-header {
   margin-bottom: 20px;
 
@@ -54,27 +56,50 @@
   color: var(--mat-sys-on-surface-variant);
 }
 
+.clickable-row {
+  cursor: pointer;
+
+  &:hover {
+    background: var(--mat-sys-surface-container-lowest);
+  }
+}
+
+.enabled-icon {
+  color: #027a48;
+}
+
+.disabled-icon {
+  color: var(--mat-sys-outline);
+}
+
+// Account Status reuses the same --approved/--pending/--rejected chip
+// modifiers (and their dark-mode counterparts in the global styles.scss)
+// as the registration-requests screen — same three-color intent (good /
+// caution / stopped), just relabelled here as Active / Suspended / Deleted.
+// See registration-requests.scss for why mat.chips-overrides is used
+// instead of a plain background/color override.
 .status-chip {
   font-size: 0.78rem;
   min-height: 24px;
 
-  &--active {
-    background: #ecfdf3 !important;
-    color: #027a48 !important;
+  &--approved {
+    @include mat.chips-overrides((
+      label-text-color: #027a48,
+      elevated-container-color: #ecfdf3,
+    ));
   }
 
   &--pending {
-    background: #fffaeb !important;
-    color: #b54708 !important;
+    @include mat.chips-overrides((
+      label-text-color: #b54708,
+      elevated-container-color: #fffaeb,
+    ));
   }
 
-  &--in-progress {
-    background: #eff8ff !important;
-    color: #175cd3 !important;
-  }
-
-  &--inactive {
-    background: var(--mat-sys-surface-container) !important;
-    color: var(--mat-sys-on-surface-variant) !important;
+  &--rejected {
+    @include mat.chips-overrides((
+      label-text-color: #b42318,
+      elevated-container-color: #fef3f2,
+    ));
   }
 }

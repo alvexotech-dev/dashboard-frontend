@@ -6,6 +6,9 @@ import { ApiResponse } from '../models/api-response';
 import { PagedResponse } from '../models/paged-response';
 import { DirectoryQuery } from '../models/directory-query';
 import { Mechanic } from '../models/mechanic';
+import { WorkshopSummary } from '../models/workshop-summary';
+
+const BASE_URL = `${environment.apiUrl}/api/users/mechanics`;
 
 @Injectable({ providedIn: 'root' })
 export class MechanicService {
@@ -19,8 +22,12 @@ export class MechanicService {
       .set('sortBy', query.sortBy)
       .set('sortDir', query.sortDir);
 
+    return this.http.get<ApiResponse<PagedResponse<Mechanic>>>(BASE_URL, { params }).pipe(map((response) => response.data));
+  }
+
+  getSummary(id: number): Observable<WorkshopSummary> {
     return this.http
-      .get<ApiResponse<PagedResponse<Mechanic>>>(`${environment.apiUrl}/api/users/mechanics`, { params })
+      .get<ApiResponse<WorkshopSummary>>(`${BASE_URL}/${id}/summary`)
       .pipe(map((response) => response.data));
   }
 }
