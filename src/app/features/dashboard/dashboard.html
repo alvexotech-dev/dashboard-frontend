@@ -1,10 +1,12 @@
 <div class="dashboard">
   <div class="dashboard-header">
-    <h1>Admin Dashboard</h1>
+    <div class="dashboard-header__text">
+      <h1>Admin Dashboard</h1>
+      <p>Overview of platform activity across riders, workshops, sales agents and finance.</p>
+    </div>
     <mat-form-field appearance="outline" class="global-search">
-      <mat-label>Search Booking ID, Workshop, Rider or Sales Agent</mat-label>
-      <input matInput placeholder="Start typing to search..." disabled />
-      <mat-icon matSuffix>search</mat-icon>
+      <mat-icon matPrefix>search</mat-icon>
+      <input matInput placeholder="Search Booking ID, Workshop, Rider or Sales Agent" disabled />
     </mat-form-field>
   </div>
 
@@ -17,8 +19,10 @@
             <div class="icon-chip">
               <mat-icon>{{ tile.icon }}</mat-icon>
             </div>
-            <div class="kpi-value">{{ tileValue(tile) }}</div>
-            <div class="kpi-label">{{ tile.label }}</div>
+            <div class="kpi-text">
+              <div class="kpi-value">{{ tileValue(tile) }}</div>
+              <div class="kpi-label">{{ tile.label }}</div>
+            </div>
           </mat-card>
         }
       </div>
@@ -31,7 +35,7 @@
       @for (card of quickNavCards(); track card.label) {
         <a class="quick-nav-card" [routerLink]="'/' + card.path">
           <mat-card>
-            <div class="icon-chip icon-chip--tertiary">
+            <div class="icon-chip">
               <mat-icon>{{ card.icon }}</mat-icon>
             </div>
             <span>{{ card.label }}</span>
