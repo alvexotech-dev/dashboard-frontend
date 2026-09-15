@@ -10,6 +10,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MechanicService } from '../../../core/services/mechanic.service';
 import { WorkshopSummary as WorkshopSummaryModel } from '../../../core/models/workshop-summary';
 import { MaskedPhone } from '../../../shared/masked-phone/masked-phone';
+import { httpErrorMessage } from '../../../core/utils/http-error-message';
 
 /**
  * ADMIN-US-02 Workshop Summary (BR-06..BR-11), opened by selecting a row in
@@ -60,8 +61,8 @@ export class WorkshopSummary {
         this.workshop.set(workshop);
         this.loading.set(false);
       },
-      error: () => {
-        this.error.set('Could not load this workshop. It may not exist, or the dashboard backend is unreachable.');
+      error: (err) => {
+        this.error.set(httpErrorMessage(err, 'Could not load this workshop. It may not exist.'));
         this.loading.set(false);
       },
     });

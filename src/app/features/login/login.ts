@@ -7,7 +7,9 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { AuthService } from '../../core/services/auth.service';
+import { httpErrorMessage } from '../../core/utils/http-error-message';
 
 @Component({
   selector: 'app-login',
@@ -19,6 +21,7 @@ import { AuthService } from '../../core/services/auth.service';
     MatButtonModule,
     MatIconModule,
     MatProgressSpinnerModule,
+    MatTooltipModule,
   ],
   templateUrl: './login.html',
   styleUrl: './login.scss',
@@ -26,10 +29,15 @@ import { AuthService } from '../../core/services/auth.service';
 export class Login {
   readonly email = signal('');
   readonly password = signal('');
+  readonly passwordVisible = signal(false);
   readonly loading = signal(false);
   readonly error = signal<string | null>(null);
 
   constructor(private auth: AuthService, private router: Router) {}
+
+  togglePasswordVisibility(): void {
+    this.passwordVisible.update((visible) => !visible);
+  }
 
   submit(): void {
     if (!this.email().trim() || !this.password()) return;
@@ -41,9 +49,9 @@ export class Login {
         this.loading.set(false);
         this.router.navigate(['/dashboard']);
       },
-      error: () => {
+      error: (err) => {
         this.loading.set(false);
-        this.error.set('Invalid email or password.');
+        this.error.set(httpErrorMessage(err, 'Invalid email or password.'));
       },
     });
   }

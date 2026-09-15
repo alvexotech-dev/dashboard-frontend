@@ -25,15 +25,11 @@
   margin-bottom: 20px;
 }
 
-// Rounds the whole segmented control rather than each individual button —
-// mat-button-toggle-group already draws its own 1px divider between
-// buttons, so this is plain structural CSS, not a token override.
 mat-button-toggle-group {
   border-radius: 999px;
   overflow: hidden;
 }
 
-// Pill-shaped search field, matching the one on the admin dashboard.
 .search-field {
   width: 100%;
   max-width: 320px;
@@ -67,8 +63,6 @@ mat-button-toggle-group {
   }
 }
 
-// Soft-shadow white cards throughout — matches the admin dashboard's card
-// treatment (dashboard.scss) rather than the flat bordered Material default.
 $card-shadow: 0 1px 2px rgba(16, 24, 40, 0.04), 0 1px 3px rgba(16, 24, 40, 0.06);
 
 .state-panel {
@@ -117,9 +111,6 @@ $card-shadow: 0 1px 2px rgba(16, 24, 40, 0.04), 0 1px 3px rgba(16, 24, 40, 0.06)
   }
 }
 
-// A dedicated inner scroller (rather than overflow-x on .table-card itself)
-// so the card's own rounded corners and header-row background stay intact
-// even when the table is wider than the card on a narrow viewport.
 .table-scroll {
   overflow-x: auto;
 }
@@ -134,9 +125,6 @@ $card-shadow: 0 1px 2px rgba(16, 24, 40, 0.04), 0 1px 3px rgba(16, 24, 40, 0.06)
 }
 
 .selected-row {
-  // !important: the global .striped-table odd/even rule (styles.scss) is
-  // more specific than a single class here, so it would otherwise win and
-  // hide the selection highlight on every other row.
   background: var(--mat-sys-primary-container) !important;
 }
 
@@ -154,15 +142,29 @@ $card-shadow: 0 1px 2px rgba(16, 24, 40, 0.04), 0 1px 3px rgba(16, 24, 40, 0.06)
   }
 
   h2 {
-    margin: 0;
+    margin: 0 0 8px;
     font-size: 1.15rem;
     font-weight: 700;
     color: var(--mat-sys-on-surface);
   }
 }
 
+.section-heading {
+  margin: 20px 0 4px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--mat-sys-on-surface);
+}
+
+.unavailable-note {
+  font-size: 0.78rem;
+  color: var(--mat-sys-on-surface-variant);
+  font-style: italic;
+  margin: 0 0 4px;
+}
+
 .detail-fields {
-  margin: 20px 0;
+  margin: 16px 0;
 
   dt {
     font-size: 0.76rem;
@@ -170,7 +172,7 @@ $card-shadow: 0 1px 2px rgba(16, 24, 40, 0.04), 0 1px 3px rgba(16, 24, 40, 0.06)
     text-transform: uppercase;
     letter-spacing: 0.03em;
     color: var(--mat-sys-on-surface-variant);
-    margin-top: 16px;
+    margin-top: 14px;
 
     &:first-child {
       margin-top: 0;
@@ -203,13 +205,28 @@ $card-shadow: 0 1px 2px rgba(16, 24, 40, 0.04), 0 1px 3px rgba(16, 24, 40, 0.06)
   margin-top: 8px;
 }
 
-// Plain `background`/`color` on the chip host doesn't reach the actual
-// visible label — Material 3 chips paint their text via an inner
-// `.mdc-evolution-chip__text-label` span that reads the
-// `--mdc-chip-label-text-color` custom property directly, ignoring the
-// host's inherited `color` (the same class of gotcha documented in
-// dashboard/CLAUDE.md for mat-list-item). `mat.chips-overrides(...)` sets
-// that property correctly, scoped per status via the surrounding selector.
+// Listed vs. Platform Trust — a neutral indigo/violet pair distinct from the
+// status-chip's amber/blue/green/red vocabulary, since type and status are
+// independent facets shown side by side on the same row.
+.type-chip {
+  font-size: 0.78rem;
+  font-weight: 600;
+  min-height: 24px;
+
+  @include mat.chips-overrides((
+    label-text-color: #465fff,
+    elevated-container-color: #ecf0ff,
+  ));
+
+  &--trust {
+    @include mat.chips-overrides((
+      label-text-color: #6941c6,
+      elevated-container-color: #f4ebff,
+    ));
+  }
+}
+
+// Same status vocabulary as registration-requests.scss / mechanics-directory.scss.
 .status-chip {
   font-size: 0.78rem;
   font-weight: 600;
@@ -244,11 +261,7 @@ $card-shadow: 0 1px 2px rgba(16, 24, 40, 0.04), 0 1px 3px rgba(16, 24, 40, 0.06)
   }
 }
 
-// Dark-mode counterparts for these four modifiers live in the global
-// styles.scss dark block instead of here: a selector like `html.dark-theme
-// .foo` written inside a component's own SCSS gets Angular's view-
-// encapsulation attribute wrongly appended to the `html.dark-theme`
-// ancestor too (which never has that attribute in the real DOM, since
-// <html> isn't part of this component's template), so the rule silently
-// never matches. Global styles aren't encapsulated, so the ancestor
-// selector works correctly there.
+// Dark-mode counterparts for both the status-chip and type-chip modifiers
+// live in the global styles.scss dark block — see registration-requests.scss
+// for why a selector like `html.dark-theme .foo` has to live there instead
+// of here.

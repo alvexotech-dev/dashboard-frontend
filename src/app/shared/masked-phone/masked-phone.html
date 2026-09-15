@@ -6,7 +6,7 @@
       mat-icon-button
       class="masked-phone__toggle"
       [matTooltip]="revealed() ? 'Hide number' : 'Show number'"
-      (click)="toggle()"
+      (click)="toggle($event)"
     >
       <mat-icon>{{ revealed() ? 'visibility_off' : 'visibility' }}</mat-icon>
     </button>

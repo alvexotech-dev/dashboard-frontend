@@ -14,20 +14,28 @@ import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatSortModule, Sort } from '@angular/material/sort';
 import { MatDialog } from '@angular/material/dialog';
 import { DatePipe, TitleCasePipe } from '@angular/common';
-import { WorkshopRegistrationRequestService } from '../../../core/services/workshop-registration-request.service';
+import { WorkshopVerificationService } from '../../../core/services/workshop-verification.service';
 import {
-  WorkshopRegistrationRequestDetail,
-  WorkshopRegistrationRequestSummary,
-} from '../../../core/models/workshop-registration-request';
+  WorkshopVerificationDetail,
+  WorkshopVerificationSummary,
+  WorkshopVerificationType,
+} from '../../../core/models/workshop-verification';
 import { MaskedPhone } from '../../../shared/masked-phone/masked-phone';
 import { ConfirmDialog } from '../../../shared/confirm-dialog/confirm-dialog';
 import { DecisionReasonDialog } from '../../../shared/decision-reason-dialog/decision-reason-dialog';
 import { httpErrorMessage } from '../../../core/utils/http-error-message';
 
 type ViewMode = 'queue' | 'all';
+type TypeFilter = WorkshopVerificationType | 'ALL';
 
+/**
+ * ADMIN-US-06 — Manage Workshop Verification Queue. Structurally a near-copy
+ * of RegistrationRequests (same master/detail layout, same lifecycle
+ * actions) plus a verification-type filter, since Listed and Trust requests
+ * share one queue (BR-02) but are reviewed and decided independently.
+ */
 @Component({
-  selector: 'app-registration-requests',
+  selector: 'app-verification-queue',
   imports: [
     MatTableModule,
     MatCardModule,
@@ -44,16 +52,17 @@ type ViewMode = 'queue' | 'all';
     DatePipe,
     TitleCasePipe,
   ],
-  templateUrl: './registration-requests.html',
-  styleUrl: './registration-requests.scss',
+  templateUrl: './verification-queue.html',
+  styleUrl: './verification-queue.scss',
 })
-export class RegistrationRequests {
-  readonly displayedColumns = ['workshopName', 'ownerName', 'contact', 'city', 'registeredAt', 'status'];
+export class VerificationQueue {
+  readonly displayedColumns = ['workshopName', 'ownerName', 'contact', 'city', 'verificationType', 'requestedAt', 'status'];
   readonly pageSizeOptions = [5, 10, 25, 50];
 
   readonly viewMode = signal<ViewMode>('queue');
+  readonly typeFilter = signal<TypeFilter>('ALL');
 
-  readonly requests = signal<WorkshopRegistrationRequestSummary[]>([]);
+  readonly requests = signal<WorkshopVerificationSummary[]>([]);
   readonly loading = signal(true);
   readonly error = signal<string | null>(null);
 
@@ -61,18 +70,18 @@ export class RegistrationRequests {
   readonly pageSize = signal(10);
   readonly totalElements = signal(0);
   readonly searchTerm = signal('');
-  readonly sortActive = signal('registeredAt');
+  readonly sortActive = signal('requestedAt');
   readonly sortDirection = signal<'asc' | 'desc'>('asc');
 
   readonly selectedId = signal<number | null>(null);
-  readonly selectedDetail = signal<WorkshopRegistrationRequestDetail | null>(null);
+  readonly selectedDetail = signal<WorkshopVerificationDetail | null>(null);
   readonly detailLoading = signal(false);
   readonly actionInProgress = signal(false);
 
   private readonly searchInput$ = new Subject<string>();
 
   constructor(
-    private requestService: WorkshopRegistrationRequestService,
+    private verificationService: WorkshopVerificationService,
     private dialog: MatDialog,
   ) {
     this.searchInput$
@@ -88,10 +97,16 @@ export class RegistrationRequests {
   onViewModeChange(mode: ViewMode): void {
     this.viewMode.set(mode);
     this.pageIndex.set(0);
-    this.sortActive.set('registeredAt');
+    this.sortActive.set('requestedAt');
     this.sortDirection.set(mode === 'queue' ? 'asc' : 'desc');
     this.selectedId.set(null);
     this.selectedDetail.set(null);
+    this.load();
+  }
+
+  onTypeFilterChange(type: TypeFilter): void {
+    this.typeFilter.set(type);
+    this.pageIndex.set(0);
     this.load();
   }
 
@@ -106,7 +121,7 @@ export class RegistrationRequests {
   }
 
   onSortChange(sort: Sort): void {
-    this.sortActive.set(sort.direction ? sort.active : 'registeredAt');
+    this.sortActive.set(sort.direction ? sort.active : 'requestedAt');
     this.sortDirection.set(sort.direction === 'desc' ? 'desc' : 'asc');
     this.pageIndex.set(0);
     this.load();
@@ -115,7 +130,7 @@ export class RegistrationRequests {
   selectRequest(id: number): void {
     this.selectedId.set(id);
     this.detailLoading.set(true);
-    this.requestService.getById(id).subscribe({
+    this.verificationService.getById(id).subscribe({
       next: (detail) => {
         this.selectedDetail.set(detail);
         this.detailLoading.set(false);
@@ -133,8 +148,8 @@ export class RegistrationRequests {
     this.dialog
       .open(ConfirmDialog, {
         data: {
-          title: 'Approve Registration',
-          message: `Approve ${detail.workshopName}'s registration?`,
+          title: `Approve ${this.typeLabel(detail.verificationType)} Status`,
+          message: `Approve ${detail.workshopName || detail.ownerName}'s ${this.typeLabel(detail.verificationType)} request?`,
           confirmText: 'Approve',
         },
       })
@@ -142,7 +157,7 @@ export class RegistrationRequests {
       .subscribe((confirmed) => {
         if (!confirmed) return;
         this.actionInProgress.set(true);
-        this.requestService.approve(detail.id).subscribe({
+        this.verificationService.approve(detail.id).subscribe({
           next: () => this.onActionComplete(detail.id),
           error: () => this.actionInProgress.set(false),
         });
@@ -156,7 +171,7 @@ export class RegistrationRequests {
     this.dialog
       .open(DecisionReasonDialog, {
         data: {
-          title: 'Reject Registration',
+          title: `Reject ${this.typeLabel(detail.verificationType)} Request`,
           label: 'Reason for rejection',
           confirmText: 'Reject',
         },
@@ -165,7 +180,7 @@ export class RegistrationRequests {
       .subscribe((reason: string | undefined) => {
         if (!reason) return;
         this.actionInProgress.set(true);
-        this.requestService.reject(detail.id, reason).subscribe({
+        this.verificationService.reject(detail.id, reason).subscribe({
           next: () => this.onActionComplete(detail.id),
           error: () => this.actionInProgress.set(false),
         });
@@ -188,7 +203,7 @@ export class RegistrationRequests {
       .subscribe((comments: string | undefined) => {
         if (!comments) return;
         this.actionInProgress.set(true);
-        this.requestService.requestInfo(detail.id, comments).subscribe({
+        this.verificationService.requestInfo(detail.id, comments).subscribe({
           next: () => this.onActionComplete(detail.id),
           error: () => this.actionInProgress.set(false),
         });
@@ -200,10 +215,14 @@ export class RegistrationRequests {
     if (!detail) return;
 
     this.actionInProgress.set(true);
-    this.requestService.markResubmitted(detail.id).subscribe({
+    this.verificationService.markResubmitted(detail.id).subscribe({
       next: () => this.onActionComplete(detail.id),
       error: () => this.actionInProgress.set(false),
     });
+  }
+
+  typeLabel(type: WorkshopVerificationType): string {
+    return type === 'TRUST' ? 'Platform Trust' : 'Listed';
   }
 
   private onActionComplete(id: number): void {
@@ -216,15 +235,17 @@ export class RegistrationRequests {
     this.loading.set(true);
     this.error.set(null);
 
+    const type = this.typeFilter();
     const query = {
       page: this.pageIndex(),
       size: this.pageSize(),
       search: this.searchTerm(),
       sortBy: this.sortActive(),
       sortDir: this.sortDirection(),
+      type: type === 'ALL' ? null : type,
     };
 
-    const result$ = this.viewMode() === 'queue' ? this.requestService.getQueue(query) : this.requestService.getAll(query);
+    const result$ = this.viewMode() === 'queue' ? this.verificationService.getQueue(query) : this.verificationService.getAll(query);
 
     result$.subscribe({
       next: (result) => {
@@ -233,7 +254,7 @@ export class RegistrationRequests {
         this.loading.set(false);
       },
       error: (err) => {
-        this.error.set(httpErrorMessage(err, 'Could not load registration requests.'));
+        this.error.set(httpErrorMessage(err, 'Could not load verification requests.'));
         this.loading.set(false);
       },
     });

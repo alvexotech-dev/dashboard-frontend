@@ -15,6 +15,7 @@ import { MatSortModule, Sort } from '@angular/material/sort';
 import { MechanicService } from '../../../core/services/mechanic.service';
 import { Mechanic } from '../../../core/models/mechanic';
 import { MaskedPhone } from '../../../shared/masked-phone/masked-phone';
+import { httpErrorMessage } from '../../../core/utils/http-error-message';
 
 @Component({
   selector: 'app-mechanics-directory',
@@ -126,8 +127,8 @@ export class MechanicsDirectory {
           this.totalElements.set(result.totalElements);
           this.loading.set(false);
         },
-        error: () => {
-          this.error.set('Could not load mechanics. Is the dashboard backend running?');
+        error: (err) => {
+          this.error.set(httpErrorMessage(err, 'Could not load mechanics.'));
           this.loading.set(false);
         },
       });

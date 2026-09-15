@@ -15,6 +15,7 @@ import { MatSortModule, Sort } from '@angular/material/sort';
 import { VehicleUserService } from '../../../core/services/vehicle-user.service';
 import { VehicleUser } from '../../../core/models/vehicle-user';
 import { MaskedPhone } from '../../../shared/masked-phone/masked-phone';
+import { httpErrorMessage } from '../../../core/utils/http-error-message';
 
 @Component({
   selector: 'app-rider-directory',
@@ -105,8 +106,8 @@ export class RiderDirectory {
           this.totalElements.set(result.totalElements);
           this.loading.set(false);
         },
-        error: () => {
-          this.error.set('Could not load riders. Is the dashboard backend running?');
+        error: (err) => {
+          this.error.set(httpErrorMessage(err, 'Could not load riders.'));
           this.loading.set(false);
         },
       });

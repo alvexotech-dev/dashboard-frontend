@@ -1,16 +1,19 @@
-<div class="registration-requests">
+<div class="verification-queue">
   <div class="page-header">
-    <h1>Workshop Registration Requests</h1>
-    <p>Review new workshop registrations. Approve, reject, or request additional information.</p>
+    <h1>Workshop Verification Queue</h1>
+    <p>Review and decide Listed Status and Platform Trust requests. Approve, reject, or request additional information.</p>
   </div>
 
   <div class="toolbar">
-    <mat-button-toggle-group
-      [value]="viewMode()"
-      (change)="onViewModeChange($event.value)"
-    >
+    <mat-button-toggle-group [value]="viewMode()" (change)="onViewModeChange($event.value)">
       <mat-button-toggle value="queue">Pending Queue</mat-button-toggle>
       <mat-button-toggle value="all">All Requests</mat-button-toggle>
+    </mat-button-toggle-group>
+
+    <mat-button-toggle-group [value]="typeFilter()" (change)="onTypeFilterChange($event.value)">
+      <mat-button-toggle value="ALL">All Types</mat-button-toggle>
+      <mat-button-toggle value="LISTED">Listed</mat-button-toggle>
+      <mat-button-toggle value="TRUST">Platform Trust</mat-button-toggle>
     </mat-button-toggle-group>
 
     <mat-form-field appearance="outline" class="search-field">
@@ -47,7 +50,7 @@
           <div class="table-scroll">
           <table mat-table [dataSource]="requests()" matSort class="striped-table" (matSortChange)="onSortChange($event)">
             <ng-container matColumnDef="workshopName">
-              <th mat-header-cell *matHeaderCellDef mat-sort-header="workshopName">Workshop</th>
+              <th mat-header-cell *matHeaderCellDef>Workshop</th>
               <td mat-cell *matCellDef="let r">{{ r.workshopName || '—' }}</td>
             </ng-container>
 
@@ -62,13 +65,22 @@
             </ng-container>
 
             <ng-container matColumnDef="city">
-              <th mat-header-cell *matHeaderCellDef mat-sort-header="city">City</th>
+              <th mat-header-cell *matHeaderCellDef>City</th>
               <td mat-cell *matCellDef="let r">{{ r.city || '—' }}</td>
             </ng-container>
 
-            <ng-container matColumnDef="registeredAt">
-              <th mat-header-cell *matHeaderCellDef mat-sort-header="registeredAt">Registered</th>
-              <td mat-cell *matCellDef="let r">{{ r.registeredAt | date: 'mediumDate' }}</td>
+            <ng-container matColumnDef="verificationType">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header="verificationType">Type</th>
+              <td mat-cell *matCellDef="let r">
+                <mat-chip class="type-chip" [class.type-chip--trust]="r.verificationType === 'TRUST'">
+                  {{ typeLabel(r.verificationType) }}
+                </mat-chip>
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="requestedAt">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header="requestedAt">Requested</th>
+              <td mat-cell *matCellDef="let r">{{ r.requestedAt | date: 'mediumDate' }}</td>
             </ng-container>
 
             <ng-container matColumnDef="status">
@@ -123,7 +135,12 @@
       } @else {
         <mat-card class="detail-card">
           <div class="detail-card__header">
-            <h2>{{ selectedDetail()!.workshopName || '—' }}</h2>
+            <div>
+              <h2>{{ selectedDetail()!.workshopName || '—' }}</h2>
+              <mat-chip class="type-chip" [class.type-chip--trust]="selectedDetail()!.verificationType === 'TRUST'">
+                {{ typeLabel(selectedDetail()!.verificationType) }}
+              </mat-chip>
+            </div>
             <mat-chip
               class="status-chip"
               [class.status-chip--pending]="selectedDetail()!.status === 'PENDING'"
@@ -146,27 +163,52 @@
             <dd>
               {{ selectedDetail()!.addressLine1 || '—' }}
               @if (selectedDetail()!.addressLine2) { , {{ selectedDetail()!.addressLine2 }} }
+              @if (selectedDetail()!.city) { , {{ selectedDetail()!.city }} }
             </dd>
 
-            <dt>City</dt>
-            <dd>{{ selectedDetail()!.city || '—' }}</dd>
+            <dt>Registration Date</dt>
+            <dd>{{ selectedDetail()!.registeredAt | date: 'mediumDate' }}</dd>
 
-            <dt>Registration Date &amp; Time</dt>
-            <dd>{{ selectedDetail()!.registeredAt | date: 'medium' }}</dd>
+            <dt>Sales Agent</dt>
+            <dd>{{ selectedDetail()!.salesAgentName || '—' }}</dd>
+          </dl>
 
-            <dt>Referred Sales Agent</dt>
-            <dd>{{ selectedDetail()!.referredSalesAgentName || '—' }}</dd>
+          <h3 class="section-heading">Qualification Information</h3>
+          <p class="unavailable-note">
+            No Listed/Trust qualification rules are configured yet, so this is the operational signal available to
+            judge the request manually rather than an automated pass/fail.
+          </p>
+          <dl class="detail-fields">
+            <dt>Account Status</dt>
+            <dd>{{ selectedDetail()!.accountStatus | titlecase }}</dd>
 
-            @if (selectedDetail()!.decisionReason) {
+            <dt>Rating</dt>
+            <dd>
+              {{ selectedDetail()!.rating !== null ? selectedDetail()!.rating : '—' }}
+              @if (selectedDetail()!.totalReviews) { ({{ selectedDetail()!.totalReviews }} reviews) }
+            </dd>
+
+            <dt>Completed Bookings</dt>
+            <dd>{{ selectedDetail()!.totalBookingsCompleted !== null ? selectedDetail()!.totalBookingsCompleted : '—' }}</dd>
+
+            <dt>Pickup &amp; Drop</dt>
+            <dd>{{ selectedDetail()!.pickupDropEnabled ? 'Enabled' : 'Disabled' }}</dd>
+
+            <dt>Advance Payment</dt>
+            <dd>{{ selectedDetail()!.advancePaymentEnabled ? 'Enabled' : 'Disabled' }}</dd>
+          </dl>
+
+          @if (selectedDetail()!.decisionReason) {
+            <dl class="detail-fields">
               <dt>Decision Reason / Comments</dt>
               <dd>{{ selectedDetail()!.decisionReason }}</dd>
-            }
 
-            @if (selectedDetail()!.decidedByAdminName) {
-              <dt>Decided By</dt>
-              <dd>{{ selectedDetail()!.decidedByAdminName }} on {{ selectedDetail()!.decidedAt | date: 'medium' }}</dd>
-            }
-          </dl>
+              @if (selectedDetail()!.decidedByAdminName) {
+                <dt>Decided By</dt>
+                <dd>{{ selectedDetail()!.decidedByAdminName }} on {{ selectedDetail()!.decidedAt | date: 'medium' }}</dd>
+              }
+            </dl>
+          }
 
           @if (selectedDetail()!.status === 'PENDING' || selectedDetail()!.status === 'ADDITIONAL_INFO_REQUESTED') {
             <div class="detail-actions">

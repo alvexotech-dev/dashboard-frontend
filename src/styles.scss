@@ -155,4 +155,21 @@ html.dark-theme {
       ));
     }
   }
+
+  // Verification-queue "Listed vs. Platform Trust" type chip
+  // (verification-queue.scss) — same indigo/violet pair as light mode, dark
+  // counterparts for contrast against a dark card.
+  .type-chip {
+    @include mat.chips-overrides((
+      label-text-color: #8da2fb,
+      elevated-container-color: #1e2a5e,
+    ));
+
+    &--trust {
+      @include mat.chips-overrides((
+        label-text-color: #cba7f5,
+        elevated-container-color: #3a2465,
+      ));
+    }
+  }
 }

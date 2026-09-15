@@ -26,7 +26,12 @@ export class MaskedPhone {
     return value.length <= 4 ? value : `*** ${last4}`;
   });
 
-  toggle(): void {
+  toggle(event: Event): void {
+    // This component is used inside clickable table rows (e.g. the Workshop
+    // Directory, which navigates to a detail page on row click) — without
+    // this the toggle button's click bubbles up and triggers that handler
+    // instead of just revealing the number.
+    event.stopPropagation();
     this.revealed.update((r) => !r);
   }
 }

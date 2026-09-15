@@ -25,6 +25,11 @@ const moduleRoutes: Routes = NAV_GROUPS.flatMap((group) =>
             import('./features/workshops/registration-requests/registration-requests').then(
               (m) => m.RegistrationRequests,
             )
+        : child.path === 'workshops/verification-queue'
+        ? () =>
+            import('./features/workshops/verification-queue/verification-queue').then(
+              (m) => m.VerificationQueue,
+            )
         : () => import('./shared/placeholder/placeholder').then((m) => m.Placeholder),
     canActivate: [roleGuard],
     data: { title: child.label, description: child.description, roles: group.roles },

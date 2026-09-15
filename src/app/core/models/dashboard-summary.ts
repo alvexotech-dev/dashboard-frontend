@@ -4,6 +4,8 @@ export interface DashboardSummary {
   registeredWorkshops: number;
   deletedWorkshops: number;
   suspendedWorkshops: number;
+  listedWorkshops: number;
+  platformTrustedWorkshops: number;
   pickupDropEnabledWorkshops: number;
   advancePaymentEnabledWorkshops: number;
   registeredSalesAgents: number;
