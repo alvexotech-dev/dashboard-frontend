@@ -1,6 +1,10 @@
-export type WorkshopVerificationType = 'LISTED' | 'TRUST';
+/** Only Platform Trust is reviewed here; Listed is the onboarding approval (Registration Requests). */
+export type WorkshopVerificationType = 'TRUST';
+
+export type VerificationMethod = 'BUSINESS_LICENSE' | 'GST_CERTIFICATE' | 'BANK_STATEMENT';
 
 export type WorkshopVerificationStatus =
+  | 'NOT_SUBMITTED'
   | 'PENDING'
   | 'ADDITIONAL_INFO_REQUESTED'
   | 'APPROVED'
@@ -15,6 +19,8 @@ export interface WorkshopVerificationSummary {
   verificationType: WorkshopVerificationType;
   status: WorkshopVerificationStatus;
   requestedAt: string;
+  /** False until the registration is approved; Platform Trust can't be approved before that. */
+  listed: boolean;
 }
 
 /**
@@ -39,6 +45,10 @@ export interface WorkshopVerificationDetail {
   verificationType: WorkshopVerificationType;
   status: WorkshopVerificationStatus;
   requestedAt: string;
+  /** False until the registration is approved; Platform Trust can't be approved before that. */
+  listed: boolean;
+  /** Methods the workshop submitted from the app; empty when NOT_SUBMITTED. */
+  completedMethods: VerificationMethod[];
 
   registeredAt: string;
   accountStatus: 'ACTIVE' | 'SUSPENDED' | 'DELETED';

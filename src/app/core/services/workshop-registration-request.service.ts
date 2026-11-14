@@ -42,10 +42,6 @@ export class WorkshopRegistrationRequestService {
     return this.http.post<ApiResponse<void>>(`${BASE_URL}/${id}/request-info`, { reason }).pipe(map(() => void 0));
   }
 
-  markResubmitted(id: number): Observable<void> {
-    return this.http.post<ApiResponse<void>>(`${BASE_URL}/${id}/mark-resubmitted`, {}).pipe(map(() => void 0));
-  }
-
   private list(
     url: string,
     query: DirectoryQuery,

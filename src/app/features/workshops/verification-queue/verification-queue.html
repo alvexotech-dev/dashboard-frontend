@@ -1,19 +1,13 @@
 <div class="verification-queue">
   <div class="page-header">
     <h1>Workshop Verification Queue</h1>
-    <p>Review and decide Listed Status and Platform Trust requests. Approve, reject, or request additional information.</p>
+    <p>Every workshop not yet Platform Verified. Approve, reject, or request additional information.</p>
   </div>
 
   <div class="toolbar">
     <mat-button-toggle-group [value]="viewMode()" (change)="onViewModeChange($event.value)">
       <mat-button-toggle value="queue">Pending Queue</mat-button-toggle>
       <mat-button-toggle value="all">All Requests</mat-button-toggle>
-    </mat-button-toggle-group>
-
-    <mat-button-toggle-group [value]="typeFilter()" (change)="onTypeFilterChange($event.value)">
-      <mat-button-toggle value="ALL">All Types</mat-button-toggle>
-      <mat-button-toggle value="LISTED">Listed</mat-button-toggle>
-      <mat-button-toggle value="TRUST">Platform Trust</mat-button-toggle>
     </mat-button-toggle-group>
 
     <mat-form-field appearance="outline" class="search-field">
@@ -69,32 +63,27 @@
               <td mat-cell *matCellDef="let r">{{ r.city || '—' }}</td>
             </ng-container>
 
-            <ng-container matColumnDef="verificationType">
-              <th mat-header-cell *matHeaderCellDef mat-sort-header="verificationType">Type</th>
-              <td mat-cell *matCellDef="let r">
-                <mat-chip class="type-chip" [class.type-chip--trust]="r.verificationType === 'TRUST'">
-                  {{ typeLabel(r.verificationType) }}
-                </mat-chip>
-              </td>
-            </ng-container>
-
             <ng-container matColumnDef="requestedAt">
               <th mat-header-cell *matHeaderCellDef mat-sort-header="requestedAt">Requested</th>
               <td mat-cell *matCellDef="let r">{{ r.requestedAt | date: 'mediumDate' }}</td>
             </ng-container>
 
             <ng-container matColumnDef="status">
-              <th mat-header-cell *matHeaderCellDef mat-sort-header="status">Status</th>
+              <th mat-header-cell *matHeaderCellDef>Status</th>
               <td mat-cell *matCellDef="let r">
                 <mat-chip
                   class="status-chip"
+                  [class.status-chip--not-submitted]="r.status === 'NOT_SUBMITTED'"
                   [class.status-chip--pending]="r.status === 'PENDING'"
                   [class.status-chip--additional-info]="r.status === 'ADDITIONAL_INFO_REQUESTED'"
                   [class.status-chip--approved]="r.status === 'APPROVED'"
                   [class.status-chip--rejected]="r.status === 'REJECTED'"
                 >
-                  {{ r.status === 'ADDITIONAL_INFO_REQUESTED' ? 'Info Requested' : (r.status | titlecase) }}
+                  {{ statusLabel(r.status) }}
                 </mat-chip>
+                @if (!r.listed) {
+                  <span class="not-listed-hint">Not listed</span>
+                }
               </td>
             </ng-container>
 
@@ -137,18 +126,17 @@
           <div class="detail-card__header">
             <div>
               <h2>{{ selectedDetail()!.workshopName || '—' }}</h2>
-              <mat-chip class="type-chip" [class.type-chip--trust]="selectedDetail()!.verificationType === 'TRUST'">
-                {{ typeLabel(selectedDetail()!.verificationType) }}
-              </mat-chip>
+              <mat-chip class="type-chip type-chip--trust">Platform Trust</mat-chip>
             </div>
             <mat-chip
               class="status-chip"
+              [class.status-chip--not-submitted]="selectedDetail()!.status === 'NOT_SUBMITTED'"
               [class.status-chip--pending]="selectedDetail()!.status === 'PENDING'"
               [class.status-chip--additional-info]="selectedDetail()!.status === 'ADDITIONAL_INFO_REQUESTED'"
               [class.status-chip--approved]="selectedDetail()!.status === 'APPROVED'"
               [class.status-chip--rejected]="selectedDetail()!.status === 'REJECTED'"
             >
-              {{ selectedDetail()!.status === 'ADDITIONAL_INFO_REQUESTED' ? 'Info Requested' : (selectedDetail()!.status | titlecase) }}
+              {{ statusLabel(selectedDetail()!.status) }}
             </mat-chip>
           </div>
 
@@ -171,6 +159,15 @@
 
             <dt>Sales Agent</dt>
             <dd>{{ selectedDetail()!.salesAgentName || '—' }}</dd>
+
+            <dt>Submitted Methods</dt>
+            <dd>
+              @for (method of selectedDetail()!.completedMethods; track method; let last = $last) {
+                {{ methodLabel(method) }}@if (!last) {, }
+              } @empty {
+                Not submitted from the app yet
+              }
+            </dd>
           </dl>
 
           <h3 class="section-heading">Qualification Information</h3>
@@ -210,9 +207,14 @@
             </dl>
           }
 
-          @if (selectedDetail()!.status === 'PENDING' || selectedDetail()!.status === 'ADDITIONAL_INFO_REQUESTED') {
+          @if (isOpen(selectedDetail()!.status)) {
             <div class="detail-actions">
-              <button mat-flat-button color="primary" [disabled]="actionInProgress()" (click)="approve()">
+              <button
+                mat-flat-button
+                color="primary"
+                [disabled]="actionInProgress() || !selectedDetail()!.listed"
+                (click)="approve()"
+              >
                 <mat-icon>check_circle</mat-icon>
                 Approve
               </button>
@@ -225,15 +227,18 @@
                 Request Additional Information
               </button>
 
-              @if (selectedDetail()!.status === 'ADDITIONAL_INFO_REQUESTED') {
-                <button mat-stroked-button [disabled]="actionInProgress()" (click)="markResubmitted()">
-                  <mat-icon>refresh</mat-icon>
-                  Mark as Resubmitted
-                </button>
-                <p class="helper-note">
-                  Interim step: there is no automated resubmission channel yet, so use this once the workshop has
-                  provided the requested information outside the portal, to send it back to Pending for re-review.
+              @if (!selectedDetail()!.listed) {
+                <p class="helper-note helper-note--warn">
+                  This workshop's registration hasn't been approved yet, so it isn't Listed. Approve the registration
+                  in Registration Requests before approving Platform Trust.
                 </p>
+              }
+              @if (selectedDetail()!.status === 'NOT_SUBMITTED') {
+                <p class="helper-note">
+                  The workshop hasn't submitted verification methods from the app yet. Approving verifies it manually.
+                </p>
+              } @else if (selectedDetail()!.status === 'ADDITIONAL_INFO_REQUESTED') {
+                <p class="helper-note">Waiting for the workshop to resubmit its verification methods from the app.</p>
               }
             </div>
           } @else {

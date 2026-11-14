@@ -195,17 +195,6 @@ export class RegistrationRequests {
       });
   }
 
-  markResubmitted(): void {
-    const detail = this.selectedDetail();
-    if (!detail) return;
-
-    this.actionInProgress.set(true);
-    this.requestService.markResubmitted(detail.id).subscribe({
-      next: () => this.onActionComplete(detail.id),
-      error: () => this.actionInProgress.set(false),
-    });
-  }
-
   private onActionComplete(id: number): void {
     this.actionInProgress.set(false);
     this.load();

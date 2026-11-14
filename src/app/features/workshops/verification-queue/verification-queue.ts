@@ -16,9 +16,10 @@ import { MatDialog } from '@angular/material/dialog';
 import { DatePipe, TitleCasePipe } from '@angular/common';
 import { WorkshopVerificationService } from '../../../core/services/workshop-verification.service';
 import {
+  VerificationMethod,
   WorkshopVerificationDetail,
+  WorkshopVerificationStatus,
   WorkshopVerificationSummary,
-  WorkshopVerificationType,
 } from '../../../core/models/workshop-verification';
 import { MaskedPhone } from '../../../shared/masked-phone/masked-phone';
 import { ConfirmDialog } from '../../../shared/confirm-dialog/confirm-dialog';
@@ -26,13 +27,31 @@ import { DecisionReasonDialog } from '../../../shared/decision-reason-dialog/dec
 import { httpErrorMessage } from '../../../core/utils/http-error-message';
 
 type ViewMode = 'queue' | 'all';
-type TypeFilter = WorkshopVerificationType | 'ALL';
+
+const STATUS_LABELS: Record<WorkshopVerificationStatus, string> = {
+  NOT_SUBMITTED: 'Not Submitted',
+  PENDING: 'Pending Review',
+  ADDITIONAL_INFO_REQUESTED: 'Info Requested',
+  APPROVED: 'Approved',
+  REJECTED: 'Rejected',
+};
+
+const METHOD_LABELS: Record<VerificationMethod, string> = {
+  BUSINESS_LICENSE: 'Business License',
+  GST_CERTIFICATE: 'GST Certificate',
+  BANK_STATEMENT: 'Bank Statement',
+};
+
+/** Statuses an admin can still act on (approve, reject or request info). */
+const OPEN_STATUSES: WorkshopVerificationStatus[] = ['NOT_SUBMITTED', 'PENDING', 'ADDITIONAL_INFO_REQUESTED'];
 
 /**
- * ADMIN-US-06 — Manage Workshop Verification Queue. Structurally a near-copy
- * of RegistrationRequests (same master/detail layout, same lifecycle
- * actions) plus a verification-type filter, since Listed and Trust requests
- * share one queue (BR-02) but are reviewed and decided independently.
+ * ADMIN-US-06 — Manage Workshop Verification Queue (Platform Trust).
+ * Structurally a near-copy of RegistrationRequests (same master/detail
+ * layout, same lifecycle actions). Every workshop not yet Platform Verified
+ * is listed: "Not Submitted" until it submits verification methods from the
+ * app, then "Pending Review". Listed status is the onboarding approval on
+ * the Registration Requests page.
  */
 @Component({
   selector: 'app-verification-queue',
@@ -56,11 +75,10 @@ type TypeFilter = WorkshopVerificationType | 'ALL';
   styleUrl: './verification-queue.scss',
 })
 export class VerificationQueue {
-  readonly displayedColumns = ['workshopName', 'ownerName', 'contact', 'city', 'verificationType', 'requestedAt', 'status'];
+  readonly displayedColumns = ['workshopName', 'ownerName', 'contact', 'city', 'requestedAt', 'status'];
   readonly pageSizeOptions = [5, 10, 25, 50];
 
   readonly viewMode = signal<ViewMode>('queue');
-  readonly typeFilter = signal<TypeFilter>('ALL');
 
   readonly requests = signal<WorkshopVerificationSummary[]>([]);
   readonly loading = signal(true);
@@ -104,12 +122,6 @@ export class VerificationQueue {
     this.load();
   }
 
-  onTypeFilterChange(type: TypeFilter): void {
-    this.typeFilter.set(type);
-    this.pageIndex.set(0);
-    this.load();
-  }
-
   onSearchInput(value: string): void {
     this.searchInput$.next(value);
   }
@@ -148,8 +160,8 @@ export class VerificationQueue {
     this.dialog
       .open(ConfirmDialog, {
         data: {
-          title: `Approve ${this.typeLabel(detail.verificationType)} Status`,
-          message: `Approve ${detail.workshopName || detail.ownerName}'s ${this.typeLabel(detail.verificationType)} request?`,
+          title: 'Approve Platform Trust Status',
+          message: `Approve ${detail.workshopName || detail.ownerName} as Platform Verified?`,
           confirmText: 'Approve',
         },
       })
@@ -171,7 +183,7 @@ export class VerificationQueue {
     this.dialog
       .open(DecisionReasonDialog, {
         data: {
-          title: `Reject ${this.typeLabel(detail.verificationType)} Request`,
+          title: 'Reject Platform Trust Request',
           label: 'Reason for rejection',
           confirmText: 'Reject',
         },
@@ -210,19 +222,16 @@ export class VerificationQueue {
       });
   }
 
-  markResubmitted(): void {
-    const detail = this.selectedDetail();
-    if (!detail) return;
-
-    this.actionInProgress.set(true);
-    this.verificationService.markResubmitted(detail.id).subscribe({
-      next: () => this.onActionComplete(detail.id),
-      error: () => this.actionInProgress.set(false),
-    });
+  statusLabel(status: WorkshopVerificationStatus): string {
+    return STATUS_LABELS[status];
   }
 
-  typeLabel(type: WorkshopVerificationType): string {
-    return type === 'TRUST' ? 'Platform Trust' : 'Listed';
+  methodLabel(method: VerificationMethod): string {
+    return METHOD_LABELS[method];
+  }
+
+  isOpen(status: WorkshopVerificationStatus): boolean {
+    return OPEN_STATUSES.includes(status);
   }
 
   private onActionComplete(id: number): void {
@@ -235,14 +244,12 @@ export class VerificationQueue {
     this.loading.set(true);
     this.error.set(null);
 
-    const type = this.typeFilter();
     const query = {
       page: this.pageIndex(),
       size: this.pageSize(),
       search: this.searchTerm(),
       sortBy: this.sortActive(),
       sortDir: this.sortDirection(),
-      type: type === 'ALL' ? null : type,
     };
 
     const result$ = this.viewMode() === 'queue' ? this.verificationService.getQueue(query) : this.verificationService.getAll(query);

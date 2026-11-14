@@ -184,13 +184,8 @@
               </button>
 
               @if (selectedDetail()!.status === 'ADDITIONAL_INFO_REQUESTED') {
-                <button mat-stroked-button [disabled]="actionInProgress()" (click)="markResubmitted()">
-                  <mat-icon>refresh</mat-icon>
-                  Mark as Resubmitted
-                </button>
                 <p class="helper-note">
-                  Interim step: there is no automated resubmission channel yet, so use this once the workshop has
-                  provided the requested information outside the portal, to send it back to Pending for re-review.
+                  Waiting for the workshop to resubmit its onboarding from the app; it then returns to Pending.
                 </p>
               }
             </div>

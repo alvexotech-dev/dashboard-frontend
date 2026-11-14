@@ -123,7 +123,7 @@
           <dd>{{ w.lastSettlementDate ? (w.lastSettlementDate | date: 'mediumDate') : 'No settlements yet' }}</dd>
 
           <dt>Last Settlement Status</dt>
-          <dd>{{ w.lastSettlementStatus ? (w.lastSettlementStatus | titlecase) : '—' }}</dd>
+          <dd>{{ w.lastSettlementStatus ? (w.lastSettlementStatus.split('_').join(' ') | titlecase) : '—' }}</dd>
         </dl>
       </mat-card>
 

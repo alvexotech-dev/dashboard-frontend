@@ -1,6 +1,12 @@
 import { AccountStatus } from './mechanic';
 
-export type SettlementStatus = 'PENDING' | 'PROCESSING' | 'PAID';
+export type SettlementStatus =
+  | 'AWAITING_PAYOUT'
+  | 'PROCESSING'
+  | 'PAID'
+  | 'FAILED'
+  | 'ON_HOLD'
+  | 'NO_SETTLEMENT_REQUIRED';
 
 /**
  * ADMIN-US-02 Workshop Summary (BR-06..BR-11). Business Information

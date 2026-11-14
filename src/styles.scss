@@ -120,6 +120,13 @@ html.dark-theme {
       ));
     }
 
+    &--not-submitted {
+      @include mat.chips-overrides((
+        label-text-color: #98a2b3,
+        elevated-container-color: #1d2939,
+      ));
+    }
+
     &--pending {
       @include mat.chips-overrides((
         label-text-color: #f7b955,
